@@ -16,29 +16,51 @@ class App extends Component {
 
   onChange = (newValue) => {
     console.log('change',newValue);
-    const codeArray = newValue.split("\n");
-    this.setState({codeArray, code:newValue});
+    if (!this.state.hasStarted){
+      const codeArray = newValue.split("\n");
+      this.setState({codeArray, code:newValue});
+    }
   }
 
   removeLine = () => {
     if (this.state.hasStarted){
-      
-    } else {
       const arrayLength = this.state.codeArray.length
-      const whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+      let whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+      while (this.state.deletedLines.includes(whichLine)){
+        whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+      }
       const oneLineRemoved = this.state.codeArray.map((line, i)=>{
-        if(i === whichLine){
-          return "\n"
+        if(i === whichLine || this.state.deletedLines.includes(i)){
+          return " "
         } else {
           return line
         }
-
       })
       const newCode = oneLineRemoved.join("\n")
       this.setState(prevState => {
         return {
           code:newCode,
           deletedLines: [...prevState.deletedLines, whichLine]
+        }
+      })
+
+    } else {
+      const arrayLength = this.state.codeArray.length
+      const whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+      const oneLineRemoved = this.state.codeArray.map((line, i)=>{
+        if(i === whichLine){
+          return " "
+        } else {
+          return line
+        }
+      })
+      const newCode = oneLineRemoved.join("\n")
+      this.setState(prevState => {
+        return {
+          code:newCode,
+          deletedLines: [...prevState.deletedLines, whichLine],
+          hasStarted: true
+        }
       })
     }
   }
@@ -59,7 +81,9 @@ class App extends Component {
           name="ace-editor"
           editorProps={{$blockScrolling: true}}
         />
-        {!this.state.hasStarted && <button onClick={this.removeLine}>Start</button>}
+        {this.state.hasStarted ? 
+        <button onClick={this.removeLine}>Remove Line</button> : 
+        <button onClick={this.removeLine}>Start</button>}
       </div>
     );
   }

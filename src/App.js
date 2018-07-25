@@ -10,7 +10,7 @@ class App extends Component {
   state = {
     code: "",
     codeArray: [],
-    deleted: [],
+    deletedLines: [],
     hasStarted: false
   }
 
@@ -22,13 +22,24 @@ class App extends Component {
 
   removeLine = () => {
     if (this.state.hasStarted){
-
+      
     } else {
       const arrayLength = this.state.codeArray.length
       const whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
-      const oneLineRemoved = [...this.state.codeArray.splice(whichLine, 1, "\n")]
+      const oneLineRemoved = this.state.codeArray.map((line, i)=>{
+        if(i === whichLine){
+          return "\n"
+        } else {
+          return line
+        }
+
+      })
       const newCode = oneLineRemoved.join("\n")
-      this.setState({code:newCode})
+      this.setState(prevState => {
+        return {
+          code:newCode,
+          deletedLines: [...prevState.deletedLines, whichLine]
+      })
     }
   }
 

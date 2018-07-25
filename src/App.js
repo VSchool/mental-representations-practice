@@ -31,7 +31,7 @@ class App extends Component {
       }
       const oneLineRemoved = this.state.codeArray.map((line, i)=>{
         if(i === whichLine || this.state.deletedLines.includes(i)){
-          return " "
+          return "// code goes here"
         } else {
           return line
         }
@@ -49,7 +49,7 @@ class App extends Component {
       const whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
       const oneLineRemoved = this.state.codeArray.map((line, i)=>{
         if(i === whichLine){
-          return " "
+          return "// code goes here"
         } else {
           return line
         }

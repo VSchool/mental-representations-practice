@@ -3,6 +3,8 @@ import './App.css';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 
+import {isThereAnyError, removeOneLine} from "./functions"
+
 import 'brace/mode/javascript';
 import 'brace/theme/solarized_dark';
 
@@ -23,26 +25,65 @@ class App extends Component {
   }
 
   removeLine = () => {
-      const arrayLength = this.state.codeArray.length
-      let whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
-      while (this.state.deletedLines.includes(whichLine)){
-        whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+    const arrayLength = this.state.codeArray.length
+    let whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+    while (this.state.deletedLines.includes(whichLine)){
+      whichLine = Math.floor(Math.random(arrayLength) * arrayLength)
+    }
+    const oneLineRemoved = removeOneLine(this.state.deletedLines, this.state.codeArray, whichLine)
+    const newCode = oneLineRemoved.join("\n")
+    this.setState(prevState => {
+      return {
+        code:newCode,
+        deletedLines: [...prevState.deletedLines, whichLine],
+        hasStarted: true
       }
-      const oneLineRemoved = this.state.codeArray.map((line, i)=>{
-        if(i === whichLine || this.state.deletedLines.includes(i)){
-          return "// code goes here"
-        } else {
-          return line
-        }
-      })
-      const newCode = oneLineRemoved.join("\n")
+    })
+  }
+
+  checkCode = () => {
+    const positionOfLastDeletedLine = this.state.deletedLines[this.state.deletedLines - 1]
+    if(this.state.code.split("\n")[positionOfLastDeletedLine] !== this.state.codeArray[positionOfLastDeletedLine]){
       this.setState(prevState => {
+        const deletedLines = prevState.deletedLines.filter((item, i) => {
+          return i < prevState.deletedLines.length - 2            
+        }) 
         return {
-          code:newCode,
-          deletedLines: [...prevState.deletedLines, whichLine],
-          hasStarted: true
+          deletedLines,
+          code: prevState.codeArray.map((line, i) => {
+            if(deletedLines.includes(i)){
+              return "// code goes here"
+            } else {
+              return line
+            }
+          })
         }
       })
+    } else {
+      if (isThereAnyError(this.state.code.split("\n"), this.state.codeArray)){
+        this.setState(prevState => {
+          const deletedLines = prevState.deletedLines.filter((item, i) => {
+            if (i === positionOfLastDeletedLine || i === prevState.deletedLines.length - 1){
+              return false
+            } else {
+              return true
+            }
+          }) 
+          return {
+            deletedLines,
+            code: prevState.codeArray.map((line, i) => {
+              if(deletedLines.includes(i)){
+                return "// code goes here"
+              } else {
+                return line
+              }
+            })
+          }
+        })
+      } else {
+        this.removeLine()
+      }
+    }
   }
 
   render() {
@@ -62,7 +103,7 @@ class App extends Component {
           editorProps={{$blockScrolling: true}}
         />
         {this.state.hasStarted ? 
-        <button onClick={this.removeLine}>Remove Line</button> : 
+        <button onClick={this.checkCode}>Check Code</button> : 
         <button onClick={this.removeLine}>Start</button>}
       </div>
     );

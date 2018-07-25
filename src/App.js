@@ -42,21 +42,24 @@ class App extends Component {
   }
 
   checkCode = () => {
-    const positionOfLastDeletedLine = this.state.deletedLines[this.state.deletedLines - 1]
+    const positionOfLastDeletedLine = this.state.deletedLines[this.state.deletedLines.length - 1]
+    // the following compares old code. this is not good
+    console.log("this:", this.state.code.split("\n")[positionOfLastDeletedLine], this.state.codeArray[positionOfLastDeletedLine]  )
     if(this.state.code.split("\n")[positionOfLastDeletedLine] !== this.state.codeArray[positionOfLastDeletedLine]){
       this.setState(prevState => {
         const deletedLines = prevState.deletedLines.filter((item, i) => {
           return i < prevState.deletedLines.length - 2            
         }) 
+        const code = prevState.codeArray.map((line, i) => {
+          if(deletedLines.includes(i)){
+            return "// code goes here"
+          } else {
+            return line
+          }
+        }).join("\n")
         return {
           deletedLines,
-          code: prevState.codeArray.map((line, i) => {
-            if(deletedLines.includes(i)){
-              return "// code goes here"
-            } else {
-              return line
-            }
-          })
+          code
         }
       })
     } else {
@@ -69,15 +72,16 @@ class App extends Component {
               return true
             }
           }) 
+          const code = prevState.codeArray.map((line, i) => {
+            if(deletedLines.includes(i)){
+              return "// code goes here"
+            } else {
+              return line
+            }
+          }).join("\n")
           return {
             deletedLines,
-            code: prevState.codeArray.map((line, i) => {
-              if(deletedLines.includes(i)){
-                return "// code goes here"
-              } else {
-                return line
-              }
-            })
+            code
           }
         })
       } else {

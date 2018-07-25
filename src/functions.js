@@ -9,6 +9,9 @@ export const removeOneLine = (deletedLines, codeArray, whichLine) => {
 }
 
 export const isThereAnyError = (usersCode, originalCode) => {
+    console.log(originalCode.some((item, i) => {
+        return item !== usersCode[i]
+    }))
     return originalCode.some((item, i) => {
         return item !== usersCode[i]
     })
